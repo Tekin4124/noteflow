@@ -12,7 +12,7 @@ Kullanıcıların meyve adlarıyla kayıt olup giriş yapabildiği, interaktif d
 
 ### 1. Bağımlılıkları Kurun
 ```bash
-npm install
+npm ci
 ```
 
 ### 2. Sunucuyu Başlatın
@@ -20,6 +20,12 @@ npm install
 npm start
 ```
 Sunucu varsayılan olarak `http://localhost:3005` üzerinde çalışır.
+
+Üretimde `NODE_ENV=production` ve kalıcı, rastgele bir `JWT_SECRET` tanımlayın. Anahtarı Git'e eklemeyin. Geliştirmede anahtar verilmezse geçici bir anahtar üretilir; yeniden başlatma mevcut oturumları geçersiz kılar.
+
+Yeni parolalar tuzlu scrypt ile saklanır. Eski SHA-256 kayıtları başarılı girişte otomatik yükseltilir; notlar korunur. Parola işlemleri asenkron çalışır. Giriş/kayıt istekleri metin alanları bekler; kullanıcı adı en fazla 64 karakter, parola en fazla 1024 UTF-8 bayt olabilir.
+
+Testler (Node.js 18 veya üzeri): `npm test`. API testleri geçici bir SQLite dosyası kullanır; uygulamanın `database.sqlite` verisine dokunmaz. İstenirse `DATABASE_PATH` ile veritabanı yolu değiştirilebilir.
 
 ### 3. Arayüzü Açın
 `index.html` dosyasını tarayıcınızda açın veya Caddy / Nginx gibi bir web sunucusunda barındırın.

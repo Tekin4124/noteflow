@@ -4,6 +4,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const crypto = require('crypto');
+const { validCredentials, hashPassword, verifyPassword, needsPasswordRehash } = require('./passwords');
 
 const app = express();
 const PORT = process.env.PORT || 3005; 
@@ -19,7 +20,22 @@ const SECRET_KEY = process.env.JWT_SECRET || (() => {
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'));
+const db = new sqlite3.Database(process.env.DATABASE_PATH || path.join(__dirname, 'database.sqlite'));
+
+function dbGet(sql, params) {
+    return new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
+    });
+}
+
+function dbRun(sql, params) {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function(err) {
+            if (err) reject(err);
+            else resolve({ lastID: this.lastID, changes: this.changes });
+        });
+    });
+}
 
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -42,26 +58,6 @@ const ALL_FRUITS = [
     "Ejder Meyvesi", "Kumkuat", "Üzüm", "Kestane"
 ];
 
-// Güvenli tuzlu (salted) scrypt parola hashleme
-function hashPassword(password) {
-    const salt = crypto.randomBytes(16).toString('hex');
-    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
-    return `${salt}:${hash}`;
-}
-
-// Zamanlama saldırılarına karşı korumalı (timingSafeEqual) parola doğrulama
-function verifyPassword(password, storedHash) {
-    if (!storedHash) return false;
-    // Geriye dönük uyumluluk (eski tuzsuz SHA-256 hash'ler için)
-    if (!storedHash.includes(':')) {
-        const legacyHash = crypto.createHash('sha256').update(password).digest('hex');
-        return legacyHash === storedHash;
-    }
-    const [salt, originalHash] = storedHash.split(':');
-    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
-    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(originalHash, 'hex'));
-}
-
 // Get fruits for dropdowns
 app.get('/api/fruits', (req, res) => {
     db.all(`SELECT fruit_name FROM users`, [], (err, rows) => {
@@ -72,37 +68,40 @@ app.get('/api/fruits', (req, res) => {
     });
 });
 
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
+    if (!validCredentials(req.body)) return res.status(400).json({ error: "Geçersiz giriş bilgisi!" });
     const { fruit_name, password } = req.body;
-    if (!fruit_name || !password) return res.status(400).json({ error: "Eksik bilgi!" });
-
-    const password_hash = hashPassword(password);
-    
-    db.run(`INSERT INTO users (fruit_name, password_hash) VALUES (?, ?)`, [fruit_name, password_hash], function(err) {
-        if (err) {
-            if (err.message.includes('UNIQUE constraint failed')) {
-                return res.status(400).json({ error: "Bu meyve zaten alınmış!" });
-            }
-            return res.status(500).json({ error: "Kayıt hatası." });
-        }
-        const token = jwt.sign({ id: this.lastID, fruit_name }, SECRET_KEY);
+    try {
+        const password_hash = await hashPassword(password);
+        const result = await dbRun(`INSERT INTO users (fruit_name, password_hash) VALUES (?, ?)`, [fruit_name, password_hash]);
+        const token = jwt.sign({ id: result.lastID, fruit_name }, SECRET_KEY);
         res.json({ token, fruit_name, message: "Hesap oluşturuldu!" });
-    });
+    } catch (err) {
+        if (err.code === 'SQLITE_CONSTRAINT' && err.message.includes('UNIQUE constraint failed')) {
+            return res.status(400).json({ error: "Bu meyve zaten alınmış!" });
+        }
+        return res.status(500).json({ error: "Kayıt hatası." });
+    }
 });
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
+    if (!validCredentials(req.body)) return res.status(400).json({ error: "Geçersiz giriş bilgisi!" });
     const { fruit_name, password } = req.body;
-    if (!fruit_name || !password) return res.status(400).json({ error: "Eksik bilgi!" });
-
-    db.get(`SELECT id, fruit_name, password_hash FROM users WHERE fruit_name = ?`, [fruit_name], (err, row) => {
-        if (err) return res.status(500).json({ error: "Giriş hatası." });
-        if (!row || !verifyPassword(password, row.password_hash)) {
+    try {
+        const row = await dbGet(`SELECT id, fruit_name, password_hash FROM users WHERE fruit_name = ?`, [fruit_name]);
+        if (!row || !await verifyPassword(password, row.password_hash)) {
             return res.status(401).json({ error: "Yanlış şifre!" });
         }
-
+        if (needsPasswordRehash(row.password_hash)) {
+            const upgradedHash = await hashPassword(password);
+            await dbRun(`UPDATE users SET password_hash = ? WHERE id = ? AND password_hash = ?`,
+                [upgradedHash, row.id, row.password_hash]);
+        }
         const token = jwt.sign({ id: row.id, fruit_name: row.fruit_name }, SECRET_KEY);
         res.json({ token, fruit_name: row.fruit_name, message: "Giriş yapıldı!" });
-    });
+    } catch (err) {
+        return res.status(500).json({ error: "Giriş hatası." });
+    }
 });
 
 function authenticateToken(req, res, next) {
@@ -135,4 +134,8 @@ app.get('/api/load', authenticateToken, (req, res) => {
     });
 });
 
-app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`); });
+if (require.main === module) {
+    app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`); });
+}
+
+module.exports = { app, db };

@@ -3,3 +3,7 @@
 database.sqlite
 .DS_Store
 Thumbs.db
+.env
+.env.*
+*.sqlite-shm
+*.sqlite-wal
