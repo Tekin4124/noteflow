@@ -7,7 +7,14 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3005; 
-const SECRET_KEY = process.env.JWT_SECRET || 'sihirli-defter-jwt-secret-degistirin';
+const SECRET_KEY = process.env.JWT_SECRET || (() => {
+    if (process.env.NODE_ENV === 'production') {
+        console.error('FATAL: Production ortamında JWT_SECRET ortam değişkeni zorunludur!');
+        process.exit(1);
+    }
+    console.warn('⚠️ Geliştirme Uyarısı: JWT_SECRET tanımlanmadı, oturum güvenliği için rastgele anahtar üretildi.');
+    return crypto.randomBytes(32).toString('hex');
+})();
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -35,8 +42,24 @@ const ALL_FRUITS = [
     "Ejder Meyvesi", "Kumkuat", "Üzüm", "Kestane"
 ];
 
+// Güvenli tuzlu (salted) scrypt parola hashleme
 function hashPassword(password) {
-    return crypto.createHash('sha256').update(password).digest('hex');
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+    return `${salt}:${hash}`;
+}
+
+// Zamanlama saldırılarına karşı korumalı (timingSafeEqual) parola doğrulama
+function verifyPassword(password, storedHash) {
+    if (!storedHash) return false;
+    // Geriye dönük uyumluluk (eski tuzsuz SHA-256 hash'ler için)
+    if (!storedHash.includes(':')) {
+        const legacyHash = crypto.createHash('sha256').update(password).digest('hex');
+        return legacyHash === storedHash;
+    }
+    const [salt, originalHash] = storedHash.split(':');
+    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(originalHash, 'hex'));
 }
 
 // Get fruits for dropdowns
@@ -71,10 +94,11 @@ app.post('/api/login', (req, res) => {
     const { fruit_name, password } = req.body;
     if (!fruit_name || !password) return res.status(400).json({ error: "Eksik bilgi!" });
 
-    const password_hash = hashPassword(password);
-    db.get(`SELECT id, fruit_name FROM users WHERE fruit_name = ? AND password_hash = ?`, [fruit_name, password_hash], (err, row) => {
+    db.get(`SELECT id, fruit_name, password_hash FROM users WHERE fruit_name = ?`, [fruit_name], (err, row) => {
         if (err) return res.status(500).json({ error: "Giriş hatası." });
-        if (!row) return res.status(401).json({ error: "Yanlış şifre!" });
+        if (!row || !verifyPassword(password, row.password_hash)) {
+            return res.status(401).json({ error: "Yanlış şifre!" });
+        }
 
         const token = jwt.sign({ id: row.id, fruit_name: row.fruit_name }, SECRET_KEY);
         res.json({ token, fruit_name: row.fruit_name, message: "Giriş yapıldı!" });
