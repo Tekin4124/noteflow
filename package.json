@@ -1,7 +1,7 @@
-﻿{
+{
   "name": "sihirli-not-defteri",
   "version": "1.0.0",
-  "description": "Büyük İnteraktif Defter | 2 Sayfalı Dijital Günlük ve Not Defteri",
+  "description": "Büyük İnteraktif Defter | Dijital Not Defteri",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

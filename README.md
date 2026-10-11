@@ -1,6 +1,6 @@
-﻿# Sihirli Not Defteri (2 Sayfalı Dijital Günlük)
+# Sihirli Not Defteri
 
-Kullanıcıların meyve adlarıyla kayıt olup giriş yapabildiği, iki sayfalı interaktif dijital not defteri ve günlük uygulaması.
+Kullanıcıların meyve adlarıyla kayıt olup giriş yapabildiği, interaktif dijital not defteri uygulaması.
 
 ## 🌟 Özellikler
 - **Ahşap Masa & Defter Arayüzü:** Gerçekçi sayfa geçişleri, font stilleri ve temalar.
