@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Büyük İİnteraktif Defter | 2 Sayfalııı Dijital Günlük</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Dancing+Script:wght@500;700&family=Indie+Flower&family=Inter:wght@300;400;500;600;700&family=Kalam:wght@300;400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Patrick+Hand&family=Playfair+Display:ital,wght@0,600;1,400&family=Cinzel:wght@600;700;900&family=Special+Elite&display=swap" rel="stylesheet">
+  <!-- FontAççwesome Icons -->
+    <div class="notebook-toolbar" id="notebookToolbar">
+      
+      <!-- Yazı Tipi & Boyutu -->
+      <div class="toolbar-group">
+        <label class="group-label"><i class="fa-solid fa-font"></i> Yazı Tipi</label>
+        <div class="group-controls">
+          <select id="fontFamilySelect" class="toolbar-select">
+            <option value="'Caveat', cursive" selected>Caveat (El Yazısı)</option>
+            <option value="'Patrick Hand', cursive">Patrick Hand (Sevimli)</option>
+            <option value="'Kalam', cursive">Kalam (Dolmakalem)</option>
+            <option value="'Dancing Script', cursive">Dancing Script (Zarif)</option>
+            <option value="'Indie Flower', cursive">Indie Flower (Samimi)</option>
+            <option value="'Special Elite', cursive">Daktilo Yazısı</option>
+            <option value="'Merriweather', serif">Merriweather (Kitap)</option>
+            <option value="'Inter', sans-serif">Inter (Modern Düz)</option>
+          </select>
+          
+          <div class="font-size-stepper">
+            <button id="btnFontSizeDec" title="Küçült"><i class="fa-solid fa-minus"></i></button>
+            <span id="fontSizeDisplay">16px</span>
+            <button id="btnFontSizeInc" title="Büyüt"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Metin Biçimlendirme -->
+      <div class="toolbar-group">
+        <label class="group-label"><i class="fa-solid fa-pencil"></i> Biçim</label>
+        <div class="group-controls btn-row">
+          <button id="btnBold" class="tool-btn" title="Kalın (Ctrl+B)"><i class="fa-solid fa-bold"></i></button>
+          <button id="btnItalic" class="tool-btn" title="İtalik (Ctrl+I)"><i class="fa-solid fa-italic"></i></button>
+          <button id="btnUnderline" class="tool-btn" title="Aççltı Çizili (Ctrl+U)"><i class="fa-solid fa-underline"></i></button>
+          <button id="btnStrike" class="tool-btn" title="Üstü Çizili"><i class="fa-solid fa-strikethrough"></i></button>
+          <button id="btnListUl" class="tool-btn" title="Maddeli Liste"><i class="fa-solid fa-list-ul"></i></button>
+          <button id="btnListOl" class="tool-btn" title="Numaralı Liste"><i class="fa-solid fa-list-ol"></i></button>
+          <button id="btnChecklist" class="tool-btn" title="Yapılacaklar Kutusu Ekle"><i class="fa-solid fa-square-check"></i></button>
+          <button id="btnAççddDate" class="tool-btn" title="Bugünün Tarihini Ekle"><i class="fa-solid fa-calendar-day"></i></button>
+        </div>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Kalem Renkleri -->
+      <div class="toolbar-group">
+        <label class="group-label"><i class="fa-solid fa-palette"></i> Kalem Rengi</label>
+        <div class="group-controls color-controls">
+          <!-- Kalem Renk Paleti -->
+          <div class="color-palette" id="penColorPalette" title="Kalem Rengi Seç">
+            <button class="color-swatch active" data-color="#1e293b" style="background-color: #1e293b;" title="Siyah Tükenmez"></button>
+            <button class="color-swatch" data-color="#1d4ed8" style="background-color: #1d4ed8;" title="Mavi Dolmakalem"></button>
+            <button class="color-swatch" data-color="#b91c1c" style="background-color: #b91c1c;" title="Kırmızı"></button>
+            <button class="color-swatch" data-color="#15803d" style="background-color: #15803d;" title="Zümrüt Yeşil"></button>
+            <button class="color-swatch" data-color="#7e22ce" style="background-color: #7e22ce;" title="Mor Mürekkep"></button>
+            <button class="color-swatch" data-color="#c2410c" style="background-color: #c2410c;" title="Sıcak Kahve"></button>
+            <button class="color-swatch" data-color="#d97706" style="background-color: #d97706;" title="Aççltın Yaldız"></button>
+            <label class="color-picker-label" title="Özel Renk Seç">
+              <i class="fa-solid fa-eye-dropper"></i>
+              <input type="color" id="customPenColor" value="#1e293b">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Defter Teması & Kapak & Kağıt -->
+      <div class="toolbar-group">
+        <label class="group-label"><i class="fa-solid fa-swatchbook"></i> Defter Tasarımı</label>
+        <div class="group-controls">
+          <!-- Kapak Rengi Seçimi -->
+          <select id="coverThemeSelect" class="toolbar-select" title="Defter Dış Kapak Rengi">
+            <option value="cover-leather">🤎 Klasik Deri (Kahve)</option>
+            <option value="cover-navy">💙 Gece Mavisi</option>
+            <option value="cover-emerald">💚 Zümrüt Yeşili</option>
+            <option value="cover-bordeaux">🍷 Bordo Deri</option>
+            <option value="cover-noir">🖤 Mat Siyah</option>
+            <option value="cover-sakura">🌸 Sakura Pembe</option>
+            <option value="cover-camel">🐪 Taba Süet</option>
+            <option value="cover-purple">💜 Kraliyet Moru</option>
+          </select>
+
+          <!-- Kağıt Deseni Seçimi -->
+          <select id="paperPatternSelect" class="toolbar-select" title="Kağıt Deseni">
+            <option value="pattern-ruled">📝 Çizgili Kağıt</option>
+            <option value="pattern-grid">📐 Kareli Kağıt</option>
+            <option value="pattern-dots">⚪ Noktalı (Bullet Journal)</option>
+            <option value="pattern-blank">📄 Düz (Çizgisiz)</option>
+            <option value="pattern-sepia">📜 Eskitilmiş Parşömen</option>
+            <option value="pattern-dark">🌙 Gece Modu Kağıt</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <!-- Çıkartma & Post-It Ekle -->
+      <div class="toolbar-group">
+        <label class="group-label"><i class="fa-solid fa-icons"></i> Süslemeler</label>
+        <div class="group-controls">
+          <button id="btnStickerModal" class="tool-btn-pill" title="Çıkartma & İkon Yapıştır">
+            <i class="fa-solid fa-face-smile"></i> Çıkartma
+          </button>
+          <button id="btnAççddSticky" class="tool-btn-pill" title="Renkli Post-it Ekle">
+            <i class="fa-solid fa-note-sticky"></i> Post-it
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AççNAçç AççLAççN: DEVAççSAçç 2 SAççYFAççLI DEFTER & OKLAççR -->
+    <main class="notebook-stage">
+      
+      <!-- SOL GEÇİŞ OKU (İNCE VE ZAççRİF YAççN BUTON) -->
+      <button id="btnPrevPage" class="page-nav-arrow arrow-left" title="Önceki Sayfalııar (Klavye: Sol Ok)">
+        <div class="arrow-inner">
+          <i class="fa-solid fa-chevron-left"></i>
+        </div>
+      </button>
+
+      <!-- 3D DEVAççSAçç DEFTER GÖVDESİ -->
+      <div class="notebook-wrapper" id="notebookWrapper">
+        
+        <!-- Defter Dış Kapağı (Hardcover / Cilt) -->
+        <div class="notebook-cover cover-leather" id="notebookCover">
+          
+          <!-- Pirinç Metal Köşebentler -->
+          <div class="corner corner-top-left"></div>
+          <div class="corner corner-top-right"></div>
+          <div class="corner corner-bottom-left"></div>
+          <div class="corner corner-bottom-right"></div>
+
+          <!-- Kırmızı/Aççltın İpek Kitap Aççyracı Şeridi (Bookmark Ribbon) -->
+          <div class="bookmark-ribbon" id="bookmarkRibbon" title="Sayfa Aççyracı"></div>
+
+          <!-- ================= 1. KAççPAççLI ÖN KAççPAççK GÖRÜNÜMÜ ================= -->
+          <div class="closed-cover-view closed-front hidden" id="closedCoverFront">
+            <div class="closed-cover-border">
+              <h2 class="closed-book-title">DEFTERİM</h2>
+              <p class="closed-book-subtitle">Notlar & Fikirler</p>
+              <div class="embossed-divider"></div>
+              <button class="btn-open-book" id="btnOpenFromFront">
+                <i class="fa-solid fa-book-open"></i> Defteri Aççç
+              </button>
+            </div>
+          </div>
+
+          <!-- ================= 2. DEFTER İÇ ÇİFT SAççYFAçç YAççYILIMI (OPEN SPREAççD) ================= -->
+          <div class="book-spread" id="bookSpread">
+
+            <!-- ================= SOL SAççYFAçç ================= -->
+            <div class="page-leaf page-left pattern-ruled" id="leftPageLeaf">
+              <!-- Kağıt Kenar Gölgesi & Dikiş Efekti -->
+              <div class="page-edge-shadow left-shadow"></div>
+              <div class="page-binding-crease"></div>
+
+              <div class="page-inner-content">
+                <!-- Sayfa Üst Başlık & Tarih Satırı -->
+                <div class="page-header">
+                  <input type="text" class="page-title-input" id="leftPageTitle" placeholder="Konu / Başlık..." spellcheck="false">
+                  <div class="page-date-box" id="leftPageDateBox">
+                    <i class="fa-regular fa-calendar"></i>
+                    <input type="date" class="page-date-input" id="leftPageDate">
+                  </div>
+                </div>
+
+                <!-- Sayfa Marjı Dikey Kırmızı Çizgisi -->
+                <div class="margin-line"></div>
+
+                <!-- Yazı Aççlanı (Content Editable - Sık Çizgili - NO SCROLL) -->
+                <div class="page-text-area" id="leftPageEditor" contenteditable="true" spellcheck="true" data-placeholder="Buraya yaz..."></div>
+
+                <!-- Post-It & Sticker Yapıştırma Katmanı (Sol Sayfa) -->
+                <div class="stickers-container" id="leftStickersContainer"></div>
+
+                <!-- Sayfa Aççlt Bilgisi & Numarası & İşlemler -->
+                <div class="page-footer">
+                  <div class="page-actions-sub">
+                    <button class="mini-btn" id="btnClearCurrentLeft" title="Sol Sayfayı Temizle (Yazıları Sil)"><i class="fa-solid fa-eraser"></i></button>
+                    <button class="mini-btn mini-btn-danger" id="btnDeleteCurrentLeft" title="Sol Sayfayı Defterden Kaldır"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                  <div class="page-number-box">
+                    <span class="page-num" id="leftPageNumber">1</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sayfa Çevirme Tetikleyici Aççlanı -->
+              <div class="page-flip-trigger flip-trigger-left" id="leftFlipTrigger" title="Önceki Sayfaya Çevir"></div>
+            </div>
+
+            <!-- DEFTER ORTAçç SIRT / DİKİŞ ÇİZGİSİ (Spine) -->
+            <div class="book-spine">
+              <div class="spine-line"></div>
+              <div class="spine-thread spine-t1"></div>
+              <div class="spine-thread spine-t2"></div>
+              <div class="spine-thread spine-t3"></div>
+              <div class="spine-thread spine-t4"></div>
+              <div class="spine-shadow"></div>
+            </div>
+
+            <!-- ================= SAççĞ SAççYFAçç ================= -->
+            <div class="page-leaf page-right pattern-ruled" id="rightPageLeaf">
+              <!-- Kağıt Kenar Gölgesi & Dikiş Efekti -->
+              <div class="page-edge-shadow right-shadow"></div>
+              <div class="page-binding-crease-right"></div>
+
+              <div class="page-inner-content">
+                <!-- Sayfa Üst Başlık & Tarih Satırı -->
+                <div class="page-header">
+                  <input type="text" class="page-title-input" id="rightPageTitle" placeholder="Konu / Başlık..." spellcheck="false">
+                  <div class="page-date-box" id="rightPageDateBox">
+                    <i class="fa-regular fa-calendar"></i>
+                    <input type="date" class="page-date-input" id="rightPageDate">
+                  </div>
+                </div>
+
+                <!-- Sayfa Marjı Dikey Kırmızı Çizgisi -->
+                <div class="margin-line"></div>
+
+                <!-- Yazı Aççlanı (Content Editable - Sık Çizgili - NO SCROLL) -->
+                <div class="page-text-area" id="rightPageEditor" contenteditable="true" spellcheck="true" data-placeholder="Buraya yaz..."></div>
+
+                <!-- Post-It & Sticker Yapıştırma Katmanı (Sağ Sayfa) -->
+                <div class="stickers-container" id="rightStickersContainer"></div>
+
+                <!-- Sayfa Aççlt Bilgisi & Numarası & İşlemler -->
+                <div class="page-footer">
+                  <div class="page-actions-sub">
+                    <button class="mini-btn" id="btnClearCurrentRight" title="Sağ Sayfayı Temizle (Yazıları Sil)"><i class="fa-solid fa-eraser"></i></button>
+                    <button class="mini-btn mini-btn-danger" id="btnDeleteCurrentRight" title="Sağ Sayfayı Defterden Kaldır"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                  <div class="page-number-box">
+                    <span class="page-num" id="rightPageNumber">2</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sayfa Çevirme Tetikleyici Aççlanı -->
+              <div class="page-flip-trigger flip-trigger-right" id="rightFlipTrigger" title="Sonraki Sayfaya Çevir"></div>
+            </div>
+
+          </div><!-- /book-spread -->
+
+          <!-- ================= 3. KAççPAççLI AççRKAçç KAççPAççK GÖRÜNÜMÜ ================= -->
+          <div class="closed-cover-view closed-back hidden" id="closedCoverBack">
+            <div class="closed-cover-border">
+              <h2 class="closed-book-title">DEFTERİN SONU</h2>
+              <p class="closed-book-subtitle">Tüm sayfalar tamamlandı</p>
+              <div class="embossed-divider"></div>
+              <button class="btn-open-book" id="btnOpenFromBack">
+                <i class="fa-solid fa-rotate-left"></i> Başa Dön ve Aççç
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /notebook-cover -->
+      </div><!-- /notebook-wrapper -->
+
+      <!-- SAççĞ GEÇİŞ OKU (İNCE VE ZAççRİF YAççN BUTON) -->
+      <button id="btnNextPage" class="page-nav-arrow arrow-right" title="Sonraki Sayfalııar (Klavye: Sağ Ok)">
+        <div class="arrow-inner">
+          <i class="fa-solid fa-chevron-right"></i>
+        </div>
+      </button>
+
+    </main>
+
+    <!-- AççLT BİLGİ & DURUM ÇUBUĞU (YAççKINLAççŞTIRMAçç / UZAççKLAççŞTIRMAçç KONTROLLÜ) -->
+    <footer class="bottom-status-bar">
+      <div class="status-left">
+        <span class="save-status" id="saveStatusBadge"><i class="fa-solid fa-cloud-arrow-up"></i> Otomatik Kaydedildi</span>
+        <span class="divider-dot">•</span>
+        <span id="wordCountBadge"><i class="fa-solid fa-file-lines"></i> 0 Kelime</span>
+      </div>
+
+      <div class="status-right">
+        <div class="zoom-stepper-control" title="Defter Görünüm Boyutu (+ / - ile Yaklaş / Uzaklaş)">
+          <span class="zoom-label"><i class="fa-solid fa-magnifying-glass"></i> Boyut:</span>
+          <button id="btnZoomOut" class="btn-zoom-step" title="Uzaklaştır / Küçült (-)"><i class="fa-solid fa-minus"></i></button>
+          <span id="zoomLevelDisplay" class="zoom-level-text" title="Varsayılan boyuta (%100) sıfırla">%100</span>
+          <button id="btnZoomIn" class="btn-zoom-step" title="Yakınlaştır / Büyüt (+)"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /app-container -->
+
+  <!-- ================= MODAççLLER ================= -->
+
+  <!-- 1. Yazdırma / PDF Seçim Modalı -->
+  <div class="modal-backdrop hidden" id="printModal">
+    <div class="modal-card print-modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-print"></i> Defteri Yazdır / PDF Olarak Kaydet</h2>
+        <button class="modal-close" id="btnClosePrintModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Nasıl yazdırmak veya PDF olarak kaydetmek istersiniz?</p>
+        <div class="print-options">
+          <button id="btnPrintCurrentSpread" class="print-choice-btn">
+            <i class="fa-solid fa-book-open"></i>
+            <div class="choice-text">
+              <strong>Sadece Bu 2 Sayfayı Yazdır</strong>
+              <span>Ekranda açık olan sol ve sağ sayfaları yatay defter formatında yazdırır veya PDF yapar.</span>
+            </div>
+          </button>
+          <button id="btnPrintAççllPages" class="print-choice-btn">
+            <i class="fa-solid fa-layer-group"></i>
+            <div class="choice-text">
+              <strong>Tüm Defteri Yazdır</strong>
+              <span>Defterdeki tüm sayfaları sırasıyla temiz bir kitap/rapor formatında yazdırır.</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. İçİçİçindekiler & Sayfa Gezgini Modalı -->
+  <div class="modal-backdrop hidden" id="tocModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-book"></i> Defter İçİçİçindekiler Tablosu</h2>
+        <button class="modal-close" id="btnCloseToc"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Gitmek istediğiniz sayfaya tıklayarak doğrudan o sayfayı açabilirsiniz:</p>
+        <div class="toc-grid" id="tocGrid">
+          <!-- Dinamik olarak doldurulacak -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnModalAççddPage" class="action-btn btn-primary"><i class="fa-solid fa-plus"></i> Yeni 2 Sayfa Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Çıkartma & Sticker Seçim Modalı -->
+  <div class="modal-backdrop hidden" id="stickerModal">
+    <div class="modal-card sticker-modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-icons"></i> Sayfaya Çıkartma & Damga Ekle</h2>
+        <button class="modal-close" id="btnCloseStickerModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="target-page-select">
+          <label>Hangi Sayfaya Eklensin?</label>
+          <div class="radio-toggle">
+            <label><input type="radio" name="stickerTargetPage" value="left" checked> Sol Sayfa</label>
+            <label><input type="radio" name="stickerTargetPage" value="right"> Sağ Sayfa</label>
+          </div>
+        </div>
+
+        <div class="sticker-tabs">
+          <button class="sticker-tab-btn active" data-cat="emojis">😊 Emojiler</button>
+          <button class="sticker-tab-btn" data-cat="study">📚 Okul & Çalışma</button>
+          <button class="sticker-tab-btn" data-cat="stamps">💮 Damgalar</button>
+          <button class="sticker-tab-btn" data-cat="nature">🌿 Doğa & Sevimli</button>
+        </div>
+
+        <div class="sticker-grid" id="stickerGrid">
+          <!-- JS ile doldurulacak -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Renkli Post-It Ekleme Modalı -->
+  <div class="modal-backdrop hidden" id="stickyModal">
+    <div class="modal-card sticky-modal-card">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-note-sticky"></i> Renkli Post-it Notu Ekle</h2>
+        <button class="modal-close" id="btnCloseStickyModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="target-page-select">
+          <label>Hangi Sayfaya Eklensin?</label>
+          <div class="radio-toggle">
+            <label><input type="radio" name="stickyTargetPage" value="left" checked> Sol Sayfa</label>
+            <label><input type="radio" name="stickyTargetPage" value="right"> Sağ Sayfa</label>
+          </div>
+        </div>
+
+        <div class="sticky-color-picker">
+          <label>Post-it Rengi:</label>
+          <div class="sticky-colors" id="stickyColorOptions">
+            <button class="sticky-color-btn active" data-color="#fef08a" style="background-color: #fef08a;"></button>
+            <button class="sticky-color-btn" data-color="#fbcfe8" style="background-color: #fbcfe8;"></button>
+            <button class="sticky-color-btn" data-color="#bbf7d0" style="background-color: #bbf7d0;"></button>
+            <button class="sticky-color-btn" data-color="#bae6fd" style="background-color: #bae6fd;"></button>
+            <button class="sticky-color-btn" data-color="#e9d5ff" style="background-color: #e9d5ff;"></button>
+            <button class="sticky-color-btn" data-color="#fed7aa" style="background-color: #fed7aa;"></button>
+          </div>
+        </div>
+
+        <textarea id="stickyNoteText" class="sticky-textarea" placeholder="Post-it üzerine notunuzu yazın... (örn: Önemli sınav tarihi!, Hatırlatma!)"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="btnInsertSticky" class="action-btn btn-primary"><i class="fa-solid fa-check"></i> Post-it'i Sayfaya Yapıştır</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ÖZEL YAççZDIRMAçç (PRINT / PDF) RENDER AççLAççNI ================= -->
+  <div id="printRenderContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

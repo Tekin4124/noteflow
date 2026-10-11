@@ -1,0 +1,21 @@
+# Örnek Caddy Yapılandırması (Kendi alan adınızı yazın)
+defter.example.com {
+    root * /opt/defter/web
+    
+    handle /api/* {
+        reverse_proxy localhost:3005
+    }
+    
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+    
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer"
+        -Server
+    }
+}
