@@ -1,32 +1,55 @@
 # Sihirli Not Defteri
 
-Kullanıcıların meyve adlarıyla kayıt olup giriş yapabildiği, interaktif dijital not defteri uygulaması.
+İki sayfalı defter görünümünde not yazma, sayfa çevirme, çıkartma ve renkli post-it ekleme uygulaması. Yazı tipi, kapak ve kâğıt teması seçilebilir; notlar tarayıcının yazdırma ekranından PDF olarak kaydedilebilir.
 
-## 🌟 Özellikler
-- **Ahşap Masa & Defter Arayüzü:** Gerçekçi sayfa geçişleri, font stilleri ve temalar.
-- **Meyveli Giriş/Kayıt Sistemi:** Kullanıcılar takma ad olarak meyve isimleri ("Elma", "Çilek", "Ananas" vb.) seçer.
-- **Güvenli Backend:** Node.js, Express, SQLite3 ve JWT token doğrulaması.
-- **Kişisel Not Depolama:** Her kullanıcının notları ve defter verileri veritabanında ayrı saklanır.
+**Sunucu hazır; alan adı için DNS bekleniyor:** `https://defter.muhammet-tekin.dev`.
 
-## 🚀 Çalıştırma
+DNS beklerken [HTTPS önizlemesini](https://notebook-preview.92-5-36-162.sslip.io) kullanabilirsiniz. İki adres aynı uygulamayı ve hesapları kullanır; tarayıcı oturumları alan adına özeldir.
 
-### 1. Bağımlılıkları Kurun
+## Kullanım
+
+- **Misafir:** Hesap açmadan çalışır. Notlar yalnız kullandığınız tarayıcıda kalır; tarayıcı verilerini silmek notları da siler.
+- **Hesap:** Bir takma ad ve en az 8 karakterli şifreyle kayıt olun. Notlar hesabınıza özel SQLite kaydında saklanır. Paylaşılan cihazda çıkış yapın.
+- Her defter en fazla **120 sayfa ve 1 MB** olabilir. Her sayfada en fazla 50 çıkartma/post-it bulunur.
+- Hesap panelinden çıkış yapabilir veya hesabınızı ve sunucudaki notlarınızı silebilirsiniz.
+- Şifre yenileme özelliği yoktur. Şifrenizi saklayın. Herkese açık örnek yayına gizli veya hassas bilgi yazmayın; PDF ile kendi kopyanızı alın.
+
+## Yerelde çalıştırma
+
+Node.js 22 veya üzeri gerekir; CI ve konteyner Node.js 24 kullanır.
+
 ```bash
 npm ci
-```
-
-### 2. Sunucuyu Başlatın
-```bash
 npm start
 ```
-Sunucu varsayılan olarak `http://localhost:3005` üzerinde çalışır.
 
-Üretimde `NODE_ENV=production` ve kalıcı, rastgele bir `JWT_SECRET` tanımlayın. Anahtarı Git'e eklemeyin. Geliştirmede anahtar verilmezse geçici bir anahtar üretilir; yeniden başlatma mevcut oturumları geçersiz kılar.
+Tarayıcıda `http://127.0.0.1:3005` adresini açın. Sunucu hem arayüzü hem API'yi sunar. Varsayılan dinleyici yalnız `127.0.0.1` üzerindedir. Geliştirmede JWT anahtarı verilmezse geçici bir anahtar üretilir.
 
-Yeni parolalar tuzlu scrypt ile saklanır. Eski SHA-256 kayıtları başarılı girişte otomatik yükseltilir; notlar korunur. Parola işlemleri asenkron çalışır. Giriş/kayıt istekleri metin alanları bekler; kullanıcı adı en fazla 64 karakter, parola en fazla 1024 UTF-8 bayt olabilir.
+```bash
+npm test
+npm audit --omit=dev
+```
 
-Testler (Node.js 18 veya üzeri): `npm test`. API testleri geçici bir SQLite dosyası kullanır; uygulamanın `database.sqlite` verisine dokunmaz. İstenirse `DATABASE_PATH` ile veritabanı yolu değiştirilebilir.
+Testler geçici veritabanları kullanır; gerçek `database.sqlite` dosyasına dokunmaz.
 
-### 3. Arayüzü Açın
-`index.html` dosyasını tarayıcınızda açın veya Caddy / Nginx gibi bir web sunucusunda barındırın.
-Örnek Caddy yapılandırması `Caddyfile` içinde mevcuttur.
+## Üretim
+
+`NODE_ENV=production`, en az 32 karakterlik rastgele `JWT_SECRET` ve HTTPS `PUBLIC_ORIGIN` zorunludur. Anahtarları Git'e eklemeyin. `DATABASE_PATH` ile kalıcı veritabanı konumunu seçin; HTTPS sağlayan bir proxy arkasında çalıştırın.
+
+`deploy/Dockerfile` ve `deploy/compose.yml`, bu portföy yayını için ayrı servis ve veri dizini kullanır. Konteyner kök kullanıcıyla çalışmaz; dosya sistemi salt okunur, kaynakları sınırlıdır ve dışarıya port açmaz. Caddy yalnız özel Unix soketine bağlanır. Compose dosyasındaki alan adı ve host dizinlerini kendi kurulumunuza göre değiştirin.
+
+`TRUST_PROXY=unix` yalnız dışarıdan erişilemeyen Unix soketi ve istemci IP başlığını yeniden yazan güvenilir proxy ile kullanılmalıdır. Genel ağda bu ayarı kullanmayın.
+
+## Güvenlik ve veri
+
+- Tuzlu, asenkron scrypt parola özeti; eski SHA-256 kayıtları başarılı girişte yükseltilir.
+- Tarayıcı oturumu HttpOnly/Secure/SameSite cookie ile taşınır ve 7 gün sonra sona erer. Tarayıcıda token localStorage'a yazılmaz. Bearer token API istemcileri için desteklenir.
+- Hesap kayıt/giriş denemeleri ve genel API istekleri sınırlıdır; kayıt kapasitesi yapılandırılabilir.
+- Not HTML'i sunucuda ve tarayıcıda temizlenir. Çapraz site istekleri engellenir; kaynak kodu ve veritabanı web üzerinden sunulmaz.
+- Hesaplar ayrı yerel önbellekler kullanır. Çıkışta mevcut hesabın yerel not kopyası kaldırılır.
+- Operatör, veri yedekleme ve saklama politikasını kendi kurulumunda belirlemelidir. Portföy yayınında günlük yedekler 7 gün tutulur; silinen hesap eski yedeklerde bu süre boyunca kalabilir.
+- Notlar uçtan uca şifreli değildir; sunucu operatörü veritabanına erişebilir.
+
+Bu kontroller tüm açıkların giderildiği garantisi değildir. Sorun bildirmek için kişisel not, parola veya token paylaşmadan GitHub issue açın.
+
+DOMPurify ve Font Awesome dosyaları `vendor/` altında lisanslarıyla birlikte sunulur. Yazı tipleri Google Fonts üzerinden yüklenir; bağlantı kurulamazsa sistem yazı tipi kullanılır. Node.js, Express, SQLite, vanilla JavaScript ve CSS kullanılır.

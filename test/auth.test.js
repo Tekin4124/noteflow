@@ -8,6 +8,8 @@ const path = require('node:path');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'notebook-auth-test-'));
 process.env.DATABASE_PATH = path.join(directory, 'test.sqlite');
 process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
+process.env.AUTH_RATE_LIMIT = '1000';
+process.env.REGISTER_RATE_LIMIT = '1000';
 const { app, db } = require('../server');
 let server;
 let baseUrl;

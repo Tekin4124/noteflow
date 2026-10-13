@@ -1,0 +1,36 @@
+services:
+  notebook:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: portfolio-notebook:local
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.75
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    environment:
+      NODE_ENV: production
+      PUBLIC_ORIGIN: https://defter.muhammet-tekin.dev
+      PREVIEW_ORIGIN: https://notebook-preview.92-5-36-162.sslip.io
+      SOCKET_PATH: /run/notebook/http.sock
+      DATABASE_PATH: /data/notebook.sqlite
+      TRUST_PROXY: unix
+      MAX_ACCOUNTS: '500'
+    env_file: /srv/public-previews/notebook/private.env
+    volumes:
+      - /srv/public-previews/notebook/data:/data
+      - /srv/public-previews/notebook/run:/run/notebook
+    networks: [private]
+    healthcheck:
+      test: [CMD, node, -e, "require('http').get({socketPath:'/run/notebook/http.sock',path:'/api/health'},r=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+networks:
+  private:
+    internal: true

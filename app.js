@@ -1,10 +1,10 @@
 /**
  * =========================================================
- * SÄ°HÄ°RLÄ° DEFTERÄ°M - 2 SAYFALI Ä°NTERAKTÄ°F DEFTER UYGULAMASI
+ * SİHİRLİ DEFTERİM - 2 SAYFALI İNTERAKTİF DEFTER UYGULAMASI
  * =========================================================
  */
 
-// 60 SayfalÄ±k VarsayÄ±lan Defter Ãœretici
+// 60 Sayfalık Varsayılan Defter Üretici
 function generateDefaultPages(total = 60) {
   const pages = [
     {
@@ -35,14 +35,18 @@ function generateDefaultPages(total = 60) {
   return pages;
 }
 
-// Ã‡Ä±kartma KÃ¼tÃ¼phanesi
+// Çıkartma Kütüphanesi
 const STICKER_DATA = {
-  emojis: ['â­', 'ğŸŒŸ', 'ğŸ’–', 'âœ¨', 'ğŸ”¥', 'ğŸ‰', 'ğŸ€', 'ğŸ’¡', 'ğŸŒˆ', 'ğŸ¨', 'ğŸš€', 'ğŸ±', 'ğŸ¶', 'ğŸ¦„', 'â˜•', 'ğŸ§', 'ğŸ•', 'ğŸ°'],
-  study: ['ğŸ“š', 'âœï¸', 'ğŸ“', 'ğŸ“Œ', 'ğŸ“', 'ğŸ“', 'ğŸ¯', 'ğŸ’¯', 'ğŸ†', 'ğŸ””', 'â³', 'ğŸ’»', 'ğŸ“–', 'ğŸ”¬', 'ğŸ“', 'ğŸ·ï¸', 'ğŸ”–', 'ğŸ“…'],
-  stamps: ['ğŸ’®', 'ğŸŒ¸', 'ğŸµï¸', 'ğŸŒº', 'ğŸ‘‘', 'ğŸ…', 'ğŸ¥‡', 'ğŸ¥ˆ', 'ğŸ¥‰', 'ğŸ’ ', 'ğŸ’¤', 'ğŸ’­', 'ğŸ—¯ï¸', 'âœ”ï¸', 'âŒ', 'â¤ï¸', 'ğŸ§¡', 'ğŸ’›'],
-  nature: ['ğŸŒ¿', 'ğŸ€', 'ğŸ‚', 'ğŸ', 'ğŸ„', 'ğŸŒ»', 'ğŸŒ¹', 'ğŸŒ·', 'ğŸŒ´', 'ğŸŒ²', 'â˜€ï¸', 'ğŸŒ™', 'â­', 'â˜ï¸', 'ğŸŒ§ï¸', 'âš¡', 'ğŸŒŠ', 'ğŸ¦‹']
+  emojis: ['⭐','🌟','💖','✨','🔥','🎉','🍀','💡','🌈','🎨','🚀','🐱','🐶','🦄','☕','🧁','🍕','🍰'],
+  study: ['📚','✏️','📝','📌','📎','📐','🎯','💯','🏆','🔔','⏳','💻','📖','🔬','🎓','🏷️','🔖','📅'],
+  stamps: ['💮','🌸','🏵️','🌺','👑','🏅','🥇','🥈','🥉','💠','💤','💭','🗯️','✔️','❌','❤️','🧡','💛'],
+  nature: ['🌿','🍀','🍂','🍁','🍄','🌻','🌹','🌷','🌴','🌲','☀️','🌙','⭐','☁️','🌧️','⚡','🌊','🦋']
 };
 
+let currentStorageSlot = 'sihirli_defter_guest_v17';
+let currentUser = null;
+let accountReady = false;
+const sanitizeContent = html => DOMPurify.sanitize(html, { FORBID_TAGS: ['img','svg','math','a','iframe','form','button','script','style'], FORBID_ATTR: ['src','srcset','href','id','name'] });
 // ================= APP STATE =================
 let state = {
   pages: [],
@@ -61,14 +65,14 @@ let state = {
   lastActiveEditor: null
 };
 
-// DOM ElemanlarÄ±
+// DOM Elemanları
 const els = {
   appContainer: document.getElementById('appContainer'),
   notebookToolbar: document.getElementById('notebookToolbar'),
   notebookWrapper: document.getElementById('notebookWrapper'),
   notebookCover: document.getElementById('notebookCover'),
   
-  // Kapaklar & Ä°Ã§ YayÄ±lÄ±m
+  // Kapaklar & İç Yayılım
   closedCoverFront: document.getElementById('closedCoverFront'),
   closedCoverBack: document.getElementById('closedCoverBack'),
   bookSpread: document.getElementById('bookSpread'),
@@ -86,7 +90,7 @@ const els = {
   btnClearCurrentLeft: document.getElementById('btnClearCurrentLeft'),
   btnDeleteCurrentLeft: document.getElementById('btnDeleteCurrentLeft'),
 
-  // SaÄŸ Sayfa
+  // Sağ Sayfa
   rightPageLeaf: document.getElementById('rightPageLeaf'),
   rightPageTitle: document.getElementById('rightPageTitle'),
   rightPageDate: document.getElementById('rightPageDate'),
@@ -97,11 +101,11 @@ const els = {
   btnClearCurrentRight: document.getElementById('btnClearCurrentRight'),
   btnDeleteCurrentRight: document.getElementById('btnDeleteCurrentRight'),
 
-  // Yan Gezinme OklarÄ±
+  // Yan Gezinme Okları
   btnPrevPage: document.getElementById('btnPrevPage'),
   btnNextPage: document.getElementById('btnNextPage'),
 
-  // Ãœst AraÃ§lar
+  // Üst Araçlar
   btnToggleToolbar: document.getElementById('btnToggleToolbar'),
   toggleToolbarIcon: document.getElementById('toggleToolbarIcon'),
   toggleToolbarText: document.getElementById('toggleToolbarText'),
@@ -129,7 +133,7 @@ const els = {
   btnStickerModal: document.getElementById('btnStickerModal'),
   btnAddSticky: document.getElementById('btnAddSticky'),
 
-  // Alt Ã‡ubuk & YakÄ±nlaÅŸtÄ±rma (Zoom)
+  // Alt Çubuk & Yakınlaştırma (Zoom)
   saveStatusBadge: document.getElementById('saveStatusBadge'),
   wordCountBadge: document.getElementById('wordCountBadge'),
   btnZoomOut: document.getElementById('btnZoomOut'),
@@ -158,7 +162,7 @@ const els = {
   btnInsertSticky: document.getElementById('btnInsertSticky')
 };
 
-// ================= BAÅLANGIÃ‡ & YÃœKLEME =================
+// ================= BAŞLANGIÇ & YÜKLEME =================
 function initApp() {
   state.lastActiveEditor = els.leftPageEditor;
   loadFromLocalStorage();
@@ -167,42 +171,12 @@ function initApp() {
   setupEventListeners();
 }
 
-// LocalStorage'dan yÃ¼kleme
+// LocalStorage'dan yükleme
 function loadFromLocalStorage() {
-  try {
-    const savedData = localStorage.getItem('sihirli_defter_data_v16');
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      state.pages = parsed.pages || generateDefaultPages(60);
-      state.currentSpread = parsed.currentSpread || 0;
-      state.viewMode = parsed.viewMode || 'open';
-      if (parsed.settings) {
-        state.settings = { ...state.settings, ...parsed.settings };
-      }
-    } else {
-      state.pages = generateDefaultPages(60);
-      state.viewMode = 'open';
-    }
-  } catch (e) {
-    console.error("YÃ¼kleme hatasÄ±:", e);
-    state.pages = generateDefaultPages(60);
-    state.viewMode = 'open';
-  }
-
-  // Defter en az 2 sayfa olsun
-  if (state.pages.length < 2) {
-    state.pages = generateDefaultPages(60);
-  }
-
-  // Sayfa sayÄ±sÄ± tekse Ã§ift yap
-  if (state.pages.length % 2 !== 0) {
-    state.pages.push(createNewPageObject(state.pages.length + 1));
-  }
-
-  // Spread sÄ±nÄ±r kontrolÃ¼
-  const maxSpread = Math.floor(state.pages.length / 2) - 1;
-  if (state.currentSpread > maxSpread) state.currentSpread = maxSpread;
-  if (state.currentSpread < 0) state.currentSpread = 0;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(currentStorageSlot) || 'null'); } catch (e) {}
+  const data = saved || { pages: generateDefaultPages(60) };
+  Object.assign(state, NotebookData.normalize(data, sanitizeContent));
 }
 
 // LocalStorage'a kaydetme
@@ -223,19 +197,20 @@ function triggerAutoSave() {
     };
 
     try {
-      localStorage.setItem('sihirli_defter_data_v16', JSON.stringify(dataToSave));
+      localStorage.setItem(currentStorageSlot, JSON.stringify(NotebookData.normalize(dataToSave, sanitizeContent)));
+      if (accountReady) queueCloudSave(dataToSave);
       els.saveStatusBadge.innerHTML = `<i class="fa-solid fa-check"></i> Otomatik Kaydedildi`;
       els.saveStatusBadge.style.color = "#34d399";
     } catch (e) {
-      console.warn("KayÄ±t kotasÄ± veya hatasÄ±:", e);
-      els.saveStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> KayÄ±t UyarÄ±sÄ±`;
+      console.warn("Kayıt kotası veya hatası:", e);
+      els.saveStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Kayıt Uyarısı`;
       els.saveStatusBadge.style.color = "#ef4444";
     }
     updateWordCount();
   }, 400);
 }
 
-// Mevcut sayfadaki inputlarÄ± state'e aktar
+// Mevcut sayfadaki inputları state'e aktar
 function saveCurrentSpreadState() {
   if (state.viewMode !== 'open') return;
 
@@ -255,16 +230,16 @@ function saveCurrentSpreadState() {
   }
 }
 
-// ================= GÃ–RSEL & SAYFA OLUÅTURMA =================
+// ================= GÖRSEL & SAYFA OLUŞTURMA =================
 function renderCurrentSpread() {
   const totalPages = state.pages.length;
   const maxSpread = Math.floor(totalPages / 2) - 1;
 
   if (state.viewMode === 'front_cover') {
-    // Ã–n Kapak GÃ¶rÃ¼nÃ¼mÃ¼ - MenÃ¼ otomatik kapalÄ±
+    // Ön Kapak Görünümü - Menü otomatik kapalı
     els.appContainer.classList.add('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-down';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ GÃ¶ster';
+    els.toggleToolbarText.textContent = 'Menüyü Göster';
 
     els.closedCoverFront.classList.remove('hidden');
     els.closedCoverBack.classList.add('hidden');
@@ -274,16 +249,16 @@ function renderCurrentSpread() {
     els.btnPrevPage.disabled = true;
     els.btnNextPage.disabled = false;
 
-    els.btnPrevPage.title = "BaÅŸlangÄ±Ã§tasÄ±nÄ±z";
-    els.btnNextPage.title = "Defteri AÃ§ (Sayfa 1-2)";
+    els.btnPrevPage.title = "Başlangıçtasınız";
+    els.btnNextPage.title = "Defteri Aç (Sayfa 1-2)";
     return;
   }
 
   if (state.viewMode === 'back_cover') {
-    // Arka Kapak GÃ¶rÃ¼nÃ¼mÃ¼ - MenÃ¼ otomatik kapalÄ±
+    // Arka Kapak Görünümü - Menü otomatik kapalı
     els.appContainer.classList.add('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-down';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ GÃ¶ster';
+    els.toggleToolbarText.textContent = 'Menüyü Göster';
 
     els.closedCoverBack.classList.remove('hidden');
     els.closedCoverFront.classList.add('hidden');
@@ -293,20 +268,20 @@ function renderCurrentSpread() {
     els.btnNextPage.disabled = true;
     els.btnPrevPage.disabled = false;
 
-    els.btnNextPage.title = "Defterin sonundasÄ±nÄ±z";
-    els.btnPrevPage.title = "Son Sayfalara DÃ¶n";
+    els.btnNextPage.title = "Defterin sonundasınız";
+    els.btnPrevPage.title = "Son Sayfalara Dön";
     return;
   }
 
-  // AÃ§Ä±k Defter GÃ¶rÃ¼nÃ¼mÃ¼
+  // Açık Defter Görünümü
   if (state.settings.toolbarCollapsed) {
     els.appContainer.classList.add('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-down';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ GÃ¶ster';
+    els.toggleToolbarText.textContent = 'Menüyü Göster';
   } else {
     els.appContainer.classList.remove('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-up';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ Gizle';
+    els.toggleToolbarText.textContent = 'Menüyü Gizle';
   }
 
   els.closedCoverFront.classList.add('hidden');
@@ -323,37 +298,37 @@ function renderCurrentSpread() {
   // Sol Sayfa Doldur
   els.leftPageTitle.value = leftPage.title || "";
   els.leftPageDate.value = leftPage.date || "";
-  els.leftPageEditor.innerHTML = leftPage.content || "";
+  els.leftPageEditor.innerHTML = sanitizeContent(leftPage.content || '');
   els.leftPageNumber.textContent = leftPage.id;
   renderStickers(els.leftStickersContainer, leftPage.stickers || [], leftIdx);
 
-  // SaÄŸ Sayfa Doldur
+  // Sağ Sayfa Doldur
   els.rightPageTitle.value = rightPage.title || "";
   els.rightPageDate.value = rightPage.date || "";
-  els.rightPageEditor.innerHTML = rightPage.content || "";
+  els.rightPageEditor.innerHTML = sanitizeContent(rightPage.content || '');
   els.rightPageNumber.textContent = rightPage.id;
   renderStickers(els.rightStickersContainer, rightPage.stickers || [], rightIdx);
 
-  // Ok ButonlarÄ±
+  // Ok Butonları
   els.btnPrevPage.disabled = false;
   els.btnNextPage.disabled = false;
 
   if (state.currentSpread === 0) {
-    els.btnPrevPage.title = "Defteri Kapat (Ã–n Kapak)";
+    els.btnPrevPage.title = "Defteri Kapat (Ön Kapak)";
   } else {
-    els.btnPrevPage.title = "Ã–nceki Sayfalar (Klavye: Sol Ok)";
+    els.btnPrevPage.title = "Önceki Sayfalar (Klavye: Sol Ok)";
   }
 
   if (state.currentSpread >= maxSpread) {
     els.btnNextPage.title = "Defteri Kapat (Arka Kapak)";
   } else {
-    els.btnNextPage.title = "Sonraki Sayfalar (Klavye: SaÄŸ Ok)";
+    els.btnNextPage.title = "Sonraki Sayfalar (Klavye: Sağ Ok)";
   }
 
   updateWordCount();
 }
 
-// ================= SAYFA Ã‡EVÄ°RME & ANÄ°MASYON =================
+// ================= SAYFA ÇEVİRME & ANİMASYON =================
 function goToNextSpread() {
   const maxSpread = Math.floor(state.pages.length / 2) - 1;
 
@@ -400,11 +375,11 @@ function animateSpreadFlip(direction) {
   const isNext = direction === 'next';
   const animClass = isNext ? 'flip-next-active' : 'flip-prev-active';
 
-  // Ã–nce iÃ§eriÄŸi gÃ¼ncelle
+  // Önce içeriği güncelle
   renderCurrentSpread();
   triggerAutoSave();
 
-  // Sonra animasyonu tetikle (reflow ile sÄ±fÄ±rla)
+  // Sonra animasyonu tetikle (reflow ile sıfırla)
   const el = els.bookSpread;
   el.classList.remove('flip-next-active', 'flip-prev-active');
   void el.offsetWidth; // reflow
@@ -448,8 +423,9 @@ function goToSpread(spreadIdx) {
   triggerAutoSave();
 }
 
-// Yeni Ã‡ift Sayfa Ekle
+// Yeni Çift Sayfa Ekle
 function addNewSpread() {
+  if (state.pages.length >= 120) return alert("Bir defter en fazla 120 sayfa olabilir.");
   saveCurrentSpreadState();
   const nextId = state.pages.length + 1;
   state.pages.push(createNewPageObject(nextId));
@@ -461,12 +437,12 @@ function addNewSpread() {
   triggerAutoSave();
 }
 
-// ================= SAYFA TEMÄ°ZLEME VE SAYFAYI KALDIRMA =================
+// ================= SAYFA TEMİZLEME VE SAYFAYI KALDIRMA =================
 
-// Sol Sayfadaki YazÄ±larÄ± Temizle
+// Sol Sayfadaki Yazıları Temizle
 function clearLeftPage() {
   const pageNum = state.currentSpread * 2 + 1;
-  if (confirm(`Sol sayfadaki (Sayfa ${pageNum}) tÃ¼m yazÄ±larÄ± temizlemek istiyor musunuz?`)) {
+  if (confirm(`Sol sayfadaki (Sayfa ${pageNum}) tüm yazıları temizlemek istiyor musunuz?`)) {
     const leftIdx = state.currentSpread * 2;
     els.leftPageTitle.value = "";
     els.leftPageDate.value = "";
@@ -482,10 +458,10 @@ function clearLeftPage() {
   }
 }
 
-// SaÄŸ Sayfadaki YazÄ±larÄ± Temizle
+// Sağ Sayfadaki Yazıları Temizle
 function clearRightPage() {
   const pageNum = state.currentSpread * 2 + 2;
-  if (confirm(`SaÄŸ sayfadaki (Sayfa ${pageNum}) tÃ¼m yazÄ±larÄ± temizlemek istiyor musunuz?`)) {
+  if (confirm(`Sağ sayfadaki (Sayfa ${pageNum}) tüm yazıları temizlemek istiyor musunuz?`)) {
     const rightIdx = state.currentSpread * 2 + 1;
     els.rightPageTitle.value = "";
     els.rightPageDate.value = "";
@@ -501,10 +477,10 @@ function clearRightPage() {
   }
 }
 
-// Sol SayfayÄ± Defterden KaldÄ±r (Sil)
+// Sol Sayfayı Defterden Kaldır (Sil)
 function deleteLeftPage() {
   const pageNum = state.currentSpread * 2 + 1;
-  if (confirm(`Sayfa ${pageNum}'i defterden tamamen kaldÄ±rmak istiyor musunuz?`)) {
+  if (confirm(`Sayfa ${pageNum}'i defterden tamamen kaldırmak istiyor musunuz?`)) {
     const leftIdx = state.currentSpread * 2;
     state.pages.splice(leftIdx, 1);
     
@@ -523,10 +499,10 @@ function deleteLeftPage() {
   }
 }
 
-// SaÄŸ SayfayÄ± Defterden KaldÄ±r (Sil)
+// Sağ Sayfayı Defterden Kaldır (Sil)
 function deleteRightPage() {
   const pageNum = state.currentSpread * 2 + 2;
-  if (confirm(`Sayfa ${pageNum}'yi defterden tamamen kaldÄ±rmak istiyor musunuz?`)) {
+  if (confirm(`Sayfa ${pageNum}'yi defterden tamamen kaldırmak istiyor musunuz?`)) {
     const rightIdx = state.currentSpread * 2 + 1;
     state.pages.splice(rightIdx, 1);
 
@@ -545,7 +521,7 @@ function deleteRightPage() {
   }
 }
 
-// ================= BOYUT Ã–LÃ‡EÄÄ° (ZOOM / YAKINLAÅTIR-UZAKLAÅTIR / SATIR YOÄUNLUÄU) =================
+// ================= BOYUT ÖLÇEĞİ (ZOOM / YAKINLAŞTIR-UZAKLAŞTIR / SATIR YOĞUNLUĞU) =================
 function setNotebookZoom(scale) {
   scale = Math.max(0.50, Math.min(1.50, parseFloat(scale.toFixed(2))));
   state.settings.notebookScale = scale;
@@ -553,16 +529,16 @@ function setNotebookZoom(scale) {
   const baseLineHeight = 22;
   const baseFontSize = 16;
 
-  // Defter Ã§erÃ§evesi ekranda daima %100 geniÅŸ ve tam boyutta kalÄ±r!
-  // (-) ye basÄ±ldÄ±ÄŸÄ±nda satÄ±rlar sÄ±klaÅŸÄ±r, satÄ±r sayÄ±sÄ± artar (geniÅŸ aÃ§Ä± gÃ¶rÃ¼nÃ¼mÃ¼)
-  // (+) ya basÄ±ldÄ±ÄŸÄ±nda satÄ±rlar bÃ¼yÃ¼r, satÄ±r sayÄ±sÄ± azalÄ±r
+  // Defter çerçevesi ekranda daima %100 geniş ve tam boyutta kalır!
+  // (-) ye basıldığında satırlar sıklaşır, satır sayısı artar (geniş açı görünümü)
+  // (+) ya basıldığında satırlar büyür, satır sayısı azalır
   const curLineHeight = Math.max(12, Math.round(baseLineHeight * scale));
   const curFontSize = Math.max(9, Math.round(baseFontSize * scale));
 
   document.documentElement.style.setProperty('--line-height', `${curLineHeight}px`);
   document.documentElement.style.setProperty('--notebook-font-size', `${curFontSize}px`);
 
-  // DÄ±ÅŸ Ã§erÃ§eve boyutunu serbest bÄ±rak (CSS'teki tam boyut geÃ§erli olsun)
+  // Dış çerçeve boyutunu serbest bırak (CSS'teki tam boyut geçerli olsun)
   els.notebookWrapper.style.maxWidth = '';
   els.notebookWrapper.style.maxHeight = '';
 
@@ -582,14 +558,14 @@ function applySettingsToUI() {
   els.coverThemeSelect.value = state.settings.coverTheme;
   els.paperPatternSelect.value = state.settings.paperPattern;
 
-  // Kapak sÄ±nÄ±fÄ± uygula
+  // Kapak sınıfı uygula
   els.notebookCover.className = `notebook-cover ${state.settings.coverTheme}`;
 
-  // KaÄŸÄ±t deseni uygula
+  // Kağıt deseni uygula
   els.leftPageLeaf.className = `page-leaf page-left ${state.settings.paperPattern}`;
   els.rightPageLeaf.className = `page-leaf page-right ${state.settings.paperPattern}`;
 
-  // Kalem paletinde aktif seÃ§imi iÅŸaretle
+  // Kalem paletinde aktif seçimi işaretle
   document.querySelectorAll('.color-swatch').forEach(sw => {
     if (sw.dataset.color === state.settings.penColor) {
       sw.classList.add('active');
@@ -598,18 +574,18 @@ function applySettingsToUI() {
     }
   });
 
-  // Zoom Ã¶lÃ§eÄŸini uygula
+  // Zoom ölçeğini uygula
   setNotebookZoom(state.settings.notebookScale || 1.0);
 
   // Toolbar gizli mi?
   if (state.settings.toolbarCollapsed) {
     els.appContainer.classList.add('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-down';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ GÃ¶ster';
+    els.toggleToolbarText.textContent = 'Menüyü Göster';
   } else {
     els.appContainer.classList.remove('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-up';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ Gizle';
+    els.toggleToolbarText.textContent = 'Menüyü Gizle';
   }
 }
 
@@ -618,16 +594,16 @@ function toggleToolbarCollapse() {
   if (state.settings.toolbarCollapsed) {
     els.appContainer.classList.add('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-down';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ GÃ¶ster';
+    els.toggleToolbarText.textContent = 'Menüyü Göster';
   } else {
     els.appContainer.classList.remove('toolbar-collapsed');
     els.toggleToolbarIcon.className = 'fa-solid fa-chevron-up';
-    els.toggleToolbarText.textContent = 'MenÃ¼yÃ¼ Gizle';
+    els.toggleToolbarText.textContent = 'Menüyü Gizle';
   }
   triggerAutoSave();
 }
 
-// ================= WEB AUDIO API Ä°LE SES SENTEZLEYÄ°CÄ° =================
+// ================= WEB AUDIO API İLE SES SENTEZLEYİCİ =================
 let audioCtx = null;
 function playPageTurnSound() {
   try {
@@ -664,11 +640,11 @@ function playPageTurnSound() {
 
     noise.start();
   } catch (e) {
-    // Sessizce geÃ§
+    // Sessizce geç
   }
 }
 
-// ================= ZENGÄ°N METÄ°N & KALEM RENK YÃ–NETÄ°MÄ° =================
+// ================= ZENGİN METİN & KALEM RENK YÖNETİMİ =================
 function formatDoc(command, value = null) {
   const targetEditor = state.lastActiveEditor || els.leftPageEditor;
   targetEditor.focus();
@@ -685,7 +661,7 @@ function applyPenColor(color) {
 }
 
 function insertChecklist() {
-  const checklistHtml = `<div class="todo-item"><input type="checkbox" class="todo-checkbox"> <span>YapÄ±lacak yeni gÃ¶rev</span></div>`;
+  const checklistHtml = `<div class="todo-item"><input type="checkbox" class="todo-checkbox"> <span>Yapılacak yeni görev</span></div>`;
   const targetEditor = state.lastActiveEditor || els.leftPageEditor;
   targetEditor.focus();
   document.execCommand('insertHTML', false, checklistHtml);
@@ -693,14 +669,14 @@ function insertChecklist() {
 }
 
 function insertDateStamp() {
-  const dateStr = `<strong>ğŸ“… ${getFormattedTodayDate()} : </strong> `;
+  const dateStr = `<strong>📅 ${getFormattedTodayDate()} : </strong> `;
   const targetEditor = state.lastActiveEditor || els.leftPageEditor;
   targetEditor.focus();
   document.execCommand('insertHTML', false, dateStr);
   triggerAutoSave();
 }
 
-// ================= Ã‡IKARTMALAR VE STICKER'LAR =================
+// ================= ÇIKARTMALAR VE STICKER'LAR =================
 function renderStickers(container, stickers, pageIndex) {
   container.innerHTML = '';
   stickers.forEach((st) => {
@@ -712,7 +688,7 @@ function renderStickers(container, stickers, pageIndex) {
       card.style.top = `${st.y}%`;
       card.innerHTML = `
         <div class="sticky-tape"></div>
-        <button class="sticky-delete-btn" title="Notu KaldÄ±r"><i class="fa-solid fa-xmark"></i></button>
+        <button class="sticky-delete-btn" title="Notu Kaldır"><i class="fa-solid fa-xmark"></i></button>
         <p>${escapeHtml(st.text)}</p>
       `;
 
@@ -729,7 +705,7 @@ function renderStickers(container, stickers, pageIndex) {
       el.textContent = st.emoji;
       el.style.left = `${st.x}%`;
       el.style.top = `${st.y}%`;
-      el.innerHTML = `${st.emoji} <button class="delete-sticker-btn" title="Sil"><i class="fa-solid fa-xmark"></i></button>`;
+      el.innerHTML = `${escapeHtml(st.emoji)} <button class="delete-sticker-btn" title="Sil"><i class="fa-solid fa-xmark"></i></button>`;
 
       el.querySelector('.delete-sticker-btn').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -834,7 +810,7 @@ function addStickyNoteToPage(targetSide, text, color) {
   closeModal(els.stickyModal);
 }
 
-// ================= YAZDIRMA (PRINT / PDF) YÃ–NETÄ°MÄ° =================
+// ================= YAZDIRMA (PRINT / PDF) YÖNETİMİ =================
 function formatPrintPageLeaf(page, isLeft) {
   const leafClass = isLeft ? 'print-page-left' : 'print-page-right';
   const pageId = page ? page.id : '';
@@ -847,10 +823,10 @@ function formatPrintPageLeaf(page, isLeft) {
       <div class="page-inner-content">
         <div class="page-header">
           <div class="print-page-title">${escapeHtml(title)}</div>
-          <div class="print-page-date">${date ? `ğŸ“… ${escapeHtml(date)}` : ''}</div>
+          <div class="print-page-date">${date ? `📅 ${escapeHtml(date)}` : ''}</div>
         </div>
         <div class="margin-line"></div>
-        <div class="page-text-area">${content}</div>
+        <div class="page-text-area">${sanitizeContent(content)}</div>
         <div class="page-footer">
           <div class="page-number-box">
             <span class="page-num">${pageId}</span>
@@ -915,7 +891,7 @@ function printAllPages() {
   }, 120);
 }
 
-// ================= Ä°Ã‡Ä°NDEKÄ°LER MODALI =================
+// ================= İÇİNDEKİLER MODALI =================
 function renderTableOfContents() {
   els.tocGrid.innerHTML = '';
   const totalSpreads = Math.ceil(state.pages.length / 2);
@@ -928,8 +904,8 @@ function renderTableOfContents() {
     card.className = `toc-item ${i === state.currentSpread && state.viewMode === 'open' ? 'active' : ''}`;
     card.innerHTML = `
       <div class="toc-spread-badge">Sayfa ${leftP.id} - ${rightP ? rightP.id : ''}</div>
-      <div class="toc-title-preview">${escapeHtml(leftP.title || "BoÅŸ Sayfa")}</div>
-      <div class="toc-title-preview" style="color: #64748b;">${rightP ? escapeHtml(rightP.title || "BoÅŸ Sayfa") : ''}</div>
+      <div class="toc-title-preview">${escapeHtml(leftP.title || "Boş Sayfa")}</div>
+      <div class="toc-title-preview" style="color: #64748b;">${rightP ? escapeHtml(rightP.title || "Boş Sayfa") : ''}</div>
     `;
 
     card.addEventListener('click', () => {
@@ -941,10 +917,10 @@ function renderTableOfContents() {
   }
 }
 
-// ================= KELÄ°ME SAYACI =================
+// ================= KELİME SAYACI =================
 function updateWordCount() {
   if (state.viewMode !== 'open') {
-    els.wordCountBadge.innerHTML = `<i class="fa-solid fa-book"></i> Defter KapalÄ±`;
+    els.wordCountBadge.innerHTML = `<i class="fa-solid fa-book"></i> Defter Kapalı`;
     return;
   }
   const leftText = els.leftPageEditor.innerText || "";
@@ -957,10 +933,10 @@ function updateWordCount() {
 // ================= EVENT LISTENERS =================
 function setupEventListeners() {
   
-  // MenÃ¼yÃ¼ Gizle / GÃ¶ster
+  // Menüyü Gizle / Göster
   els.btnToggleToolbar.addEventListener('click', toggleToolbarCollapse);
 
-  // Takvim ikonuna tÄ±klayÄ±nca date picker aÃ§
+  // Takvim ikonuna tıklayınca date picker aç
   document.querySelectorAll('.page-date-box .fa-calendar').forEach(icon => {
     icon.addEventListener('click', () => {
       const dateInput = icon.parentElement.querySelector('input[type="date"]');
@@ -983,11 +959,11 @@ function setupEventListeners() {
 
   if (els.zoomLevelDisplay) {
     els.zoomLevelDisplay.addEventListener('click', () => {
-      setNotebookZoom(1.0); // %100'e sÄ±fÄ±rla
+      setNotebookZoom(1.0); // %100'e sıfırla
     });
   }
 
-  // Kapak AÃ§ma ButonlarÄ±
+  // Kapak Açma Butonları
   els.btnOpenFromFront.addEventListener('click', () => {
     state.viewMode = 'open';
     state.currentSpread = 0;
@@ -1023,17 +999,17 @@ function setupEventListeners() {
     triggerAutoSave();
   });
 
-  // Son Aktif EditÃ¶r Takibi
+  // Son Aktif Editör Takibi
   els.leftPageEditor.addEventListener('focus', () => state.lastActiveEditor = els.leftPageEditor);
   els.rightPageEditor.addEventListener('focus', () => state.lastActiveEditor = els.rightPageEditor);
 
-  // Sayfa DeÄŸiÅŸtirme ButonlarÄ± & Kenar TÄ±klamalarÄ±
+  // Sayfa Değiştirme Butonları & Kenar Tıklamaları
   els.btnPrevPage.addEventListener('click', goToPrevSpread);
   els.btnNextPage.addEventListener('click', goToNextSpread);
   els.leftFlipTrigger.addEventListener('click', goToPrevSpread);
   els.rightFlipTrigger.addEventListener('click', goToNextSpread);
 
-  // Klavye YÃ¶n TuÅŸlarÄ± ile Sayfa DeÄŸiÅŸtirme
+  // Klavye Yön Tuşları ile Sayfa Değiştirme
   window.addEventListener('keydown', (e) => {
     const isEditing = document.activeElement && (
       document.activeElement.tagName === 'INPUT' || 
@@ -1050,7 +1026,7 @@ function setupEventListeners() {
     }
   });
 
-  // Metin DeÄŸiÅŸikliÄŸi & Input Dinleyicileri
+  // Metin Değişikliği & Input Dinleyicileri
   [els.leftPageTitle, els.leftPageDate, els.rightPageTitle, els.rightPageDate].forEach(input => {
     input.addEventListener('input', triggerAutoSave);
   });
@@ -1059,7 +1035,7 @@ function setupEventListeners() {
     editor.addEventListener('input', triggerAutoSave);
     editor.addEventListener('keyup', updateWordCount);
 
-    // Checkbox tÄ±klamalarÄ±
+    // Checkbox tıklamaları
     editor.addEventListener('change', (e) => {
       if (e.target.classList.contains('todo-checkbox')) {
         const parent = e.target.closest('.todo-item');
@@ -1098,7 +1074,7 @@ function setupEventListeners() {
     }
   });
 
-  // BiÃ§imlendirme ButonlarÄ±
+  // Biçimlendirme Butonları
   els.btnBold.addEventListener('click', () => formatDoc('bold'));
   els.btnItalic.addEventListener('click', () => formatDoc('italic'));
   els.btnUnderline.addEventListener('click', () => formatDoc('underline'));
@@ -1123,14 +1099,14 @@ function setupEventListeners() {
     applyPenColor(color);
   });
 
-  // Kapak TemasÄ± SeÃ§imi
+  // Kapak Teması Seçimi
   els.coverThemeSelect.addEventListener('change', (e) => {
     state.settings.coverTheme = e.target.value;
     els.notebookCover.className = `notebook-cover ${state.settings.coverTheme}`;
     triggerAutoSave();
   });
 
-  // KaÄŸÄ±t Deseni SeÃ§imi
+  // Kağıt Deseni Seçimi
   els.paperPatternSelect.addEventListener('change', (e) => {
     state.settings.paperPattern = e.target.value;
     els.leftPageLeaf.className = `page-leaf page-left ${state.settings.paperPattern}`;
@@ -1138,10 +1114,10 @@ function setupEventListeners() {
     triggerAutoSave();
   });
 
-  // Ãœst Butonlar
+  // Üst Butonlar
   els.btnNewSpread.addEventListener('click', addNewSpread);
 
-  // Sayfa Temizleme ve KaldÄ±rma
+  // Sayfa Temizleme ve Kaldırma
   els.btnClearCurrentLeft.addEventListener('click', clearLeftPage);
   els.btnDeleteCurrentLeft.addEventListener('click', deleteLeftPage);
 
@@ -1159,7 +1135,7 @@ function setupEventListeners() {
     }
   });
 
-  // DÄ±ÅŸa Aktar / YazdÄ±r ModalÄ±
+  // Dışa Aktar / Yazdır Modalı
   els.btnExport.addEventListener('click', () => openModal(els.printModal));
   els.btnClosePrintModal.addEventListener('click', () => closeModal(els.printModal));
   els.btnPrintCurrentSpread.addEventListener('click', printCurrentSpread);
@@ -1176,7 +1152,7 @@ function setupEventListeners() {
     closeModal(els.tocModal);
   });
 
-  // Ã‡Ä±kartma ModalÄ±
+  // Çıkartma Modalı
   els.btnStickerModal.addEventListener('click', () => {
     loadStickersByCategory('emojis');
     openModal(els.stickerModal);
@@ -1191,7 +1167,7 @@ function setupEventListeners() {
     });
   });
 
-  // Post-it ModalÄ±
+  // Post-it Modalı
   els.btnAddSticky.addEventListener('click', () => openModal(els.stickyModal));
   els.btnCloseStickyModal.addEventListener('click', () => closeModal(els.stickyModal));
 
@@ -1210,7 +1186,7 @@ function setupEventListeners() {
     addStickyNoteToPage(target, text, selectedStickyColor);
   });
 
-  // Modal dÄ±ÅŸÄ±na tÄ±klayÄ±nca kapat
+  // Modal dışına tıklayınca kapat
   [els.printModal, els.tocModal, els.stickerModal, els.stickyModal].forEach(modal => {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal(modal);
@@ -1241,7 +1217,7 @@ function closeModal(modal) {
   modal.classList.add('hidden');
 }
 
-// ================= YARDIMCI FONKSÄ°YONLAR =================
+// ================= YARDIMCI FONKSİYONLAR =================
 function createNewPageObject(id) {
   return {
     id: id,
@@ -1261,178 +1237,102 @@ function getFormattedTodayDate() {
 function escapeHtml(text) {
   if (!text) return '';
   const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-  return text.replace(/[&<>"']/g, m => map[m]);
+  return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
-// UygulamayÄ± BaÅŸlat
+// Uygulamayı Başlat
 document.addEventListener('DOMContentLoaded', initApp);
 
-/* ================= API AND AUTH ================= */
-const API_URL = (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')) && window.location.port !== '3005'
-  ? 'http://localhost:3005/api'
-  : '/api';
-let authToken = localStorage.getItem('sihirli_defter_token');
-let currentUser = localStorage.getItem('sihirli_defter_user');
 
-async function fetchFruits() {
-  try {
-    const res = await fetch(API_URL + '/fruits');
-    if (res.ok) {
-      const data = await res.json();
-      populateDropdown('loginFruit', data.registered, '-- Kayıtlı Meyveni Seç --');
-      populateDropdown('registerFruit', data.available, '-- Boşta Olan Bir Meyve Seç --');
-    }
-  } catch (e) {
-    console.error('Meyve listesi alınamadı:', e);
-  }
-}
-
-function populateDropdown(elementId, items, placeholder) {
-  const select = document.getElementById(elementId);
-  select.innerHTML = '<option value=\"\">' + placeholder + '</option>';
-  items.forEach(item => {
-    const opt = document.createElement('option');
-    opt.value = item;
-    opt.textContent = item;
-    select.appendChild(opt);
-  });
-}
-
+/* ================= ACCOUNT AND PERSISTENCE ================= */
+const API_URL = '/api';
+const authError = message => document.getElementById('authError').textContent = message;
 function showAuthModal() {
   document.getElementById('authModal').classList.remove('hidden');
-  document.getElementById('appContainer').style.filter = 'blur(5px)';
-  fetchFruits();
-}
-
-function hideAuthModal() {
-  document.getElementById('authModal').classList.add('hidden');
-  document.getElementById('appContainer').style.filter = 'none';
-}
-
-function switchAuthTab(tab) {
-  document.getElementById('tabLogin').classList.remove('active');
-  document.getElementById('tabRegister').classList.remove('active');
-  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('accountActions').classList.toggle('hidden', !currentUser);
+  document.getElementById('loginForm').classList.toggle('hidden', !!currentUser);
   document.getElementById('registerForm').classList.add('hidden');
-  
-  if (tab === 'login') {
-    document.getElementById('tabLogin').classList.add('active');
-    document.getElementById('loginForm').classList.remove('hidden');
-  } else {
-    document.getElementById('tabRegister').classList.add('active');
-    document.getElementById('registerForm').classList.remove('hidden');
-  }
+  document.querySelector('.auth-tabs').classList.toggle('hidden', !!currentUser);
+  document.getElementById('btnGuest').textContent = currentUser ? 'Deftere dön' : 'Misafir olarak devam et';
+  authError('');
 }
-
-async function handleRegister() {
-  const fruit = document.getElementById('registerFruit').value;
-  const pass = document.getElementById('registerPass').value;
-  if (!fruit) return alert('Lütfen bir meyve seçin!');
-  if (!pass) return alert('Şifre giriniz!');
-  
+function hideAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+function switchAuthTab(tab) {
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab!=='register');
+  authError('');
+}
+async function api(route, options={}) {
+  const response = await fetch(API_URL+route, { ...options, headers: { 'Content-Type':'application/json', ...options.headers } });
+  const data = await response.json();
+  if (!response.ok) { const err = new Error(data.error || 'İstek tamamlanamadı.'); err.status = response.status; throw err; }
+  return data;
+}
+function updateAccountLabel() { document.getElementById('accountLabel').textContent = currentUser?.fruit_name || 'Hesap'; }
+async function activateAccount(user) {
+  clearTimeout(saveTimeout); accountReady=false;
+  currentUser=user; currentStorageSlot='sihirli_defter_user_'+user.user_id;
+  // Start from this account's local copy; never reuse the previous account's notebook.
+  loadFromLocalStorage();
+  const cloud = await api('/load');
+  if (cloud) Object.assign(state,NotebookData.normalize(cloud,sanitizeContent));
+  state.lastActiveEditor=els.leftPageEditor;
+  applySettingsToUI(); renderCurrentSpread(); renderTableOfContents(); updateAccountLabel();
+  accountReady=true; hideAuthModal();
+}
+async function handleAuth(kind) {
+  const form=document.getElementById(kind==='login'?'loginForm':'registerForm');
+  const button=form.querySelector('button');button.disabled=true;authError('');
   try {
-    const res = await fetch(API_URL + '/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fruit_name: fruit, password: pass })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert('Hesap oluşturuldu! Meyve Adın: ' + data.fruit_name + '\nLütfen unutma!');
-      authToken = data.token;
-      currentUser = data.fruit_name;
-      localStorage.setItem('sihirli_defter_token', authToken);
-      localStorage.setItem('sihirli_defter_user', currentUser);
-      hideAuthModal();
-      loadCloudData();
-    } else {
-      alert(data.error);
+    const user=await api('/'+kind,{method:'POST',body:JSON.stringify({fruit_name:document.getElementById(kind+'Fruit').value.trim(),password:document.getElementById(kind+'Pass').value})});
+    document.getElementById(kind+'Pass').value='';await activateAccount(user);
+  } catch(e) { authError(e.message); } finally { button.disabled=false; }
+}
+let pendingSave=null, saving=false;
+function queueCloudSave(data) {
+  pendingSave={key:currentStorageSlot,data:NotebookData.normalize(data,sanitizeContent)};
+  if (!saving) flushCloudSave();
+}
+async function flushCloudSave() {
+  saving=true;
+  while (pendingSave && accountReady) {
+    const snapshot=pendingSave;pendingSave=null;
+    if(snapshot.key!==currentStorageSlot) continue;
+    try { await api('/sync',{method:'POST',body:JSON.stringify(snapshot.data)}); }
+    catch(e) {
+      pendingSave=null;
+      els.saveStatusBadge.textContent='Sunucuya kaydedilemedi · yerel kopya korundu';
+      els.saveStatusBadge.style.color='#ef4444';
+      if(e.status===401){accountReady=false;showAuthModal();authError(e.message);}
+      break;
     }
-  } catch (e) {
-    alert('Sunucuya bağlanılamadı!');
   }
+  saving=false;
 }
-
-async function handleLogin() {
-  const fruit = document.getElementById('loginFruit').value;
-  const pass = document.getElementById('loginPass').value;
-  if (!fruit || !pass) return alert('Meyveni seç ve şifreni gir!');
-  
+async function handleLogout(remove=false) {
+  if(remove && !confirm('Hesabın ve sunucudaki notların kalıcı olarak silinsin mi?')) return;
+  const oldKey=currentStorageSlot;
   try {
-    const res = await fetch(API_URL + '/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fruit_name: fruit, password: pass })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      authToken = data.token;
-      currentUser = data.fruit_name;
-      localStorage.setItem('sihirli_defter_token', authToken);
-      localStorage.setItem('sihirli_defter_user', currentUser);
-      hideAuthModal();
-      loadCloudData();
-    } else {
-      alert(data.error);
-    }
-  } catch (e) {
-    alert('Sunucuya bağlanılamadı!');
-  }
+    clearTimeout(saveTimeout);
+    if(saving){authError('Kayıt işlemi bitince tekrar deneyin.');return;}
+    await api(remove?'/account':'/logout',{method:remove?'DELETE':'POST'});
+    pendingSave=null;accountReady=false;currentUser=null;
+    localStorage.removeItem(oldKey);currentStorageSlot='sihirli_defter_guest_v17';
+    loadFromLocalStorage();applySettingsToUI();renderCurrentSpread();updateAccountLabel();showAuthModal();
+  } catch(e) { authError(e.message); }
 }
-
-function handleLogout() {
-  if(confirm('Çıkış yapmak istediğine emin misin?')) {
-    localStorage.removeItem('sihirli_defter_token');
-    localStorage.removeItem('sihirli_defter_user');
-    window.location.reload();
-  }
-}
-
-async function saveCloudData(dataObj) {
-  if (!authToken) return;
-  try {
-    await fetch(API_URL + '/sync', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + authToken
-      },
-      body: JSON.stringify(dataObj)
-    });
-  } catch(e) {
-    console.error('Senkronizasyon hatası', e);
-  }
-}
-
-async function loadCloudData() {
-  if (!authToken) return;
-  try {
-    const res = await fetch(API_URL + '/load', {
-      headers: { 'Authorization': 'Bearer ' + authToken }
-    });
-    const data = await res.json();
-    if (data) {
-      state = Object.assign({}, defaultState, data);
-      renderCurrentSpread();
-      renderTOC();
-    }
-  } catch(e) {
-    console.error('Veri yükleme hatası', e);
-  }
-}
-
-const originalTriggerAutoSave = triggerAutoSave;
-triggerAutoSave = function() {
-  originalTriggerAutoSave();
-  if (authToken) {
-      saveCloudData(state);
-  }
-};
-
-window.addEventListener('load', () => {
-  if (!authToken) {
-    showAuthModal();
-  } else {
-    loadCloudData();
-  }
+window.addEventListener('load', async () => {
+  document.getElementById('tabLogin').addEventListener('click',()=>switchAuthTab('login'));
+  document.getElementById('tabRegister').addEventListener('click',()=>switchAuthTab('register'));
+  document.getElementById('loginForm').addEventListener('submit',e=>{e.preventDefault();handleAuth('login');});
+  document.getElementById('registerForm').addEventListener('submit',e=>{e.preventDefault();handleAuth('register');});
+  document.getElementById('btnGuest').addEventListener('click',hideAuthModal);
+  document.getElementById('btnAccount').addEventListener('click',showAuthModal);
+  document.getElementById('btnLogout').addEventListener('click',()=>handleLogout());
+  document.getElementById('btnDeleteAccount').addEventListener('click',()=>handleLogout(true));
+  // Old browser tokens were readable by scripts; new sessions use HttpOnly cookies.
+  localStorage.removeItem('sihirli_defter_token');localStorage.removeItem('sihirli_defter_user');
+  try { await activateAccount(await api('/me')); } catch(e) { showAuthModal(); if(e.status!==401)authError(e.message); }
 });

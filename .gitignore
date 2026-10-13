@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 *.log
 database.sqlite
 .DS_Store
@@ -7,3 +7,7 @@ Thumbs.db
 .env.*
 *.sqlite-shm
 *.sqlite-wal
+
+*.sqlite
+*.sqlite-journal
+private.env
