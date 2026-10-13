@@ -6,6 +6,15 @@
 
 Eski [önizleme adresi](https://notebook-preview.92-5-36-162.sslip.io) de çalışır. Aynı uygulama ve hesapları kullanır; tarayıcı oturumları ve misafir notları alan adına özeldir.
 
+## Ekran görüntüleri
+
+Misafir notlarıyla defter görünümü ve hesap ekranı:
+
+![İki sayfalı defter ve post-it](docs/screenshots/defter.jpg)
+
+![Misafir veya hesap seçimi](docs/screenshots/hesap.jpg)
+
+
 ## Kullanım
 
 - **Misafir:** Hesap açmadan çalışır. Notlar yalnız kullandığınız tarayıcıda kalır; tarayıcı verilerini silmek notları da siler.
