@@ -2,9 +2,9 @@
 
 İki sayfalı defter görünümünde not yazma, sayfa çevirme, çıkartma ve renkli post-it ekleme uygulaması. Yazı tipi, kapak ve kâğıt teması seçilebilir; notlar tarayıcının yazdırma ekranından PDF olarak kaydedilebilir.
 
-**Sunucu hazır; alan adı için DNS bekleniyor:** `https://defter.muhammet-tekin.dev`.
+[📖 Webde kullan](https://defter.muhammet-tekin.dev) · [Kurulum](#yerelde-çalıştırma) · [Güvenlik ve veri](#güvenlik-ve-veri)
 
-DNS beklerken [HTTPS önizlemesini](https://notebook-preview.92-5-36-162.sslip.io) kullanabilirsiniz. İki adres aynı uygulamayı ve hesapları kullanır; tarayıcı oturumları alan adına özeldir.
+Eski [önizleme adresi](https://notebook-preview.92-5-36-162.sslip.io) de çalışır. Aynı uygulama ve hesapları kullanır; tarayıcı oturumları ve misafir notları alan adına özeldir.
 
 ## Kullanım
 
