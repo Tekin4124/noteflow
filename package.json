@@ -1,7 +1,7 @@
 {
-  "name": "sihirli-not-defteri",
+  "name": "noteflow",
   "version": "1.0.0",
-  "description": "Büyük İnteraktif Defter | Dijital Not Defteri",
+  "description": "NoteFlow — İki Sayfalı Dijital Not Defteri",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

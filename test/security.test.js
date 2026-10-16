@@ -20,7 +20,7 @@ test('sessions expire, browser cookies are HttpOnly, and users cannot read each 
  assert.equal((await request('/api/sync',a,'POST',{pages:[{content:'only-A'}]})).status,200);
  assert.equal(await (await request('/api/load',b)).json(),null);
  assert.equal((await (await request('/api/load',a)).json()).pages[0].content,'only-A');
- const expired=jwt.sign({id:parsed.id},process.env.JWT_SECRET,{expiresIn:-1,issuer:'sihirli-not-defteri',audience:'notebook'});
+ const expired=jwt.sign({id:parsed.id},process.env.JWT_SECRET,{expiresIn:-1,issuer:'noteflow',audience:'notebook'});
  assert.equal((await request('/api/load',expired)).status,401);
 });
 test('HTML attack payloads are removed while basic formatting and checklists survive',async()=>{

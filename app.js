@@ -1,6 +1,6 @@
 /**
  * =========================================================
- * SİHİRLİ DEFTERİM - 2 SAYFALI İNTERAKTİF DEFTER UYGULAMASI
+ * NOTEFLOW - 2 SAYFALI İNTERAKTİF DEFTER UYGULAMASI
  * =========================================================
  */
 

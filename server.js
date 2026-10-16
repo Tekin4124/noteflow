@@ -48,7 +48,7 @@ function authCapacity(req,res,next) {
 }
 const COOKIE = 'notebook_session';
 function issueSession(res, user) {
-  const token = jwt.sign({ id: user.id, fruit_name: user.fruit_name }, SECRET_KEY, { expiresIn: '7d', issuer: 'sihirli-not-defteri', audience: 'notebook' });
+  const token = jwt.sign({ id: user.id, fruit_name: user.fruit_name }, SECRET_KEY, { expiresIn: '7d', issuer: 'noteflow', audience: 'notebook' });
   res.cookie(COOKIE, token, { httpOnly: true, secure: production, sameSite: 'strict', maxAge: 7 * 86400000, path: '/' });
   return { token, fruit_name: user.fruit_name, user_id: user.id };
 }
@@ -78,7 +78,7 @@ async function authenticate(req,res,next) {
   const cookie = (req.headers.cookie || '').split(';').map(v => v.trim()).find(v => v.startsWith(COOKIE + '='))?.slice(COOKIE.length + 1);
   if (!bearer && !cookie) return res.status(401).json({ error: 'Oturum açın.' });
   try {
-    const user = jwt.verify(bearer || cookie, SECRET_KEY, { algorithms: ['HS256'], issuer: 'sihirli-not-defteri', audience: 'notebook' });
+    const user = jwt.verify(bearer || cookie, SECRET_KEY, { algorithms: ['HS256'], issuer: ['noteflow', 'sihirli-not-defteri'], audience: 'notebook' });
     if (!await get('SELECT id FROM users WHERE id = ?', [user.id])) return res.status(401).json({ error: 'Oturum sona erdi.' });
     req.user = user; next();
   } catch (err) { res.status(401).json({ error: 'Oturum sona erdi. Yeniden giriş yapın.' }); }

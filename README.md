@@ -1,4 +1,4 @@
-# Sihirli Not Defteri
+# NoteFlow
 
 İki sayfalı defter görünümünde not yazma, sayfa çevirme, çıkartma ve renkli post-it ekleme uygulaması. Yazı tipi, kapak ve kâğıt teması seçilebilir; notlar tarayıcının yazdırma ekranından PDF olarak kaydedilebilir.
 
