@@ -4,8 +4,6 @@
 
 [📖 Webde kullan](https://defter.muhammet-tekin.dev) · [Kurulum](#yerelde-çalıştırma) · [Güvenlik ve veri](#güvenlik-ve-veri)
 
-Eski [önizleme adresi](https://notebook-preview.92-5-36-162.sslip.io) de çalışır. Aynı uygulama ve hesapları kullanır; tarayıcı oturumları ve misafir notları alan adına özeldir.
-
 ## Ekran görüntüleri
 
 Misafir notlarıyla defter görünümü ve hesap ekranı:
